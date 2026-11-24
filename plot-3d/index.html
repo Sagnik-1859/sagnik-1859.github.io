@@ -46,6 +46,7 @@ input[type=range]{width:100%;accent-color:var(--accent)}
     <div id="rows"></div>
     <button class="go" id="add">+ Add surface</button>
     <div class="row" id="pre"></div>
+    <div class="m">Conicoids (replace the plot):</div><div class="row" id="con"></div>
     <div id="sl"></div>
     <div class="dom">
       <span>x</span><input id="x0" value="-5"><span>to</span><input id="x1" value="5">
@@ -187,6 +188,14 @@ cv.addEventListener('wheel',e=>{e.preventDefault();st.zoom=Math.min(8,Math.max(.
   .forEach(([n,e])=>{const b=document.createElement('button');b.textContent='+ '+n;b.onclick=()=>add(e);$('pre').append(b)});
 [['Top',0,Math.PI/2],['Front',0,0],['Side',Math.PI/2,0],['Iso',-.8,.6]]
   .forEach(([n,y,p])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{Object.assign(st,{yaw:y,pit:p,zoom:1});draw()};$('views').append(b)});
+[['Ellipsoid',['sqrt(1-x^2/4-y^2/9)','-sqrt(1-x^2/4-y^2/9)'],[-2,2,-3,3,-1,1]],
+ ['Cone',['sqrt(x^2+y^2)','-sqrt(x^2+y^2)'],[-3,3,-3,3,-3,3]],
+ ['Hyperboloid 1',['sqrt(x^2+y^2-1)','-sqrt(x^2+y^2-1)'],[-3,3,-3,3,-3,3]],
+ ['Hyperboloid 2',['sqrt(1+x^2+y^2)','-sqrt(1+x^2+y^2)'],[-3,3,-3,3,-4,4]]]
+  .forEach(([n,ex,dm])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{
+    S=ex.map(src=>{const f={src};compile(f);return f});
+    ['x0','x1','y0','y1','z0','z1'].forEach((id,i)=>$(id).value=dm[i]);
+    renderRows();update();readDomain()};$('con').append(b)});
 let raf;
 $('sp').onchange=e=>{st.spin=e.target.checked;const tick=()=>{if(!st.spin)return;st.yaw+=.01;draw();raf=requestAnimationFrame(tick)};cancelAnimationFrame(raf);tick()};
 $('pp').onchange=e=>{st.persp=e.target.checked;draw()};
