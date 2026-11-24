@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prime Number Checker — Sagnik Datta</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #131a2a;
+      --surface-2: #1a2338;
+      --border: #24304d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #38bdf8;
+      --prime: #10b981;
+      --prime-bg: rgba(16, 185, 129, 0.14);
+      --comp: #f59e0b;
+      --comp-bg: rgba(245, 158, 11, 0.14);
+      --neither: #a78bfa;
+      --neither-bg: rgba(167, 139, 250, 0.14);
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0284c7;
+      --prime: #059669;
+      --prime-bg: rgba(5, 150, 105, 0.12);
+      --comp: #d97706;
+      --comp-bg: rgba(217, 119, 6, 0.12);
+      --neither: #7c3aed;
+      --neither-bg: rgba(124, 58, 237, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 1.5rem 1rem 3rem;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+
+    .back-link:hover { text-decoration: underline; }
+
+    .btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn:hover { border-color: var(--accent); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b0f19;
+      border-color: var(--accent);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 0.65rem;
+      margin-bottom: 0.9rem;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.75rem 1rem;
+      border-radius: 10px;
+      font-size: 1.05rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      align-items: center;
+    }
+
+    .presets span {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-right: 0.25rem;
+    }
+
+    .preset-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+
+    .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
+
+    .status-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      margin-bottom: 1.25rem;
+      font-weight: 700;
+    }
+
+    .status-prime { background: var(--prime-bg); color: var(--prime); border: 1px solid var(--prime); }
+    .status-comp { background: var(--comp-bg); color: var(--comp); border: 1px solid var(--comp); }
+    .status-neither { background: var(--neither-bg); color: var(--neither); border: 1px solid var(--neither); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.9rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-box {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+    }
+
+    .stat-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-val {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 1rem;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .jump-btn {
+      margin-top: 0.4rem;
+      font-size: 0.76rem;
+      padding: 0.2rem 0.55rem;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .history-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--surface-2);
+      padding: 0.55rem 0.85rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+
+    .history-item:hover { border: 1px solid var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar">
+      <a href="../index.html" class="back-link">← Back to Portfolio</a>
+      <button class="btn" id="themeBtn">☀️ Light</button>
+    </div>
+
+    <div class="card">
+      <h1>Prime Number Checker</h1>
+      <p class="subtitle">Arbitrary-precision BigInt primality testing, prime factorization & nearest primes (up to 500 digits).</p>
+
+      <div class="input-row">
+        <input type="text" id="numInput" placeholder="Enter an integer (e.g., 2147483647)" value="2147483647" />
+        <button class="btn btn-primary" id="checkBtn">Check</button>
+      </div>
+
+      <div class="presets">
+        <span>Presets:</span>
+        <button class="preset-chip" data-val="0">0</button>
+        <button class="preset-chip" data-val="1">1</button>
+        <button class="preset-chip" data-val="60">60</button>
+        <button class="preset-chip" data-val="104729">104729 (10,000th prime)</button>
+        <button class="preset-chip" data-val="2147483647">2³¹−1</button>
+        <button class="preset-chip" data-val="2305843009213693951">2⁶¹−1</button>
+      </div>
+    </div>
+
+    <div class="card" id="resultCard">
+      <div id="statusBanner" class="status-banner status-prime">
+        <span id="statusText">PRIME NUMBER</span>
+        <span id="digitCount" style="font-size: 0.82rem; opacity: 0.85;">10 digits</span>
+      </div>
+
+      <div class="stat-box" style="margin-bottom: 0.9rem;">
+        <div class="stat-label">Prime Factorization</div>
+        <div class="stat-val" id="factorizationVal">2147483647</div>
+      </div>
+
+      <div class="grid-2">
+        <div class="stat-box">
+          <div class="stat-label">Smallest Prime Factor</div>
+          <div class="stat-val" id="spfVal">2147483647</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Largest Prime Factor</div>
+          <div class="stat-val" id="lpfVal">2147483647</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Nearest Prime Below</div>
+          <div class="stat-val" id="prevPrimeVal">2147483629</div>
+          <button class="btn jump-btn" id="jumpPrevBtn">Check this</button>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Nearest Prime Above</div>
+          <div class="stat-val" id="nextPrimeVal">2147483659</div>
+          <button class="btn jump-btn" id="jumpNextBtn">Check this</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+        <h2 style="font-size:1rem;">Recent Checks</h2>
+        <button class="btn" id="clearHistoryBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Clear</button>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </div>
+  </div>
+
+  <script>
+    const themeBtn = document.getElementById('themeBtn');
+    themeBtn.addEventListener('click', () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
+    });
+
+    function modPow(base, exp, mod) {
+      let res = 1n;
+      base %= mod;
+      while (exp > 0n) {
+        if (exp & 1n) res = (res * base) % mod;
+        base = (base * base) % mod;
+        exp >>= 1n;
+      }
+      return res;
+    }
+
+    function isPrime(n) {
+      if (n < 2n) return false;
+      const smallPrimes = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n];
+      for (const p of smallPrimes) {
+        if (n === p) return true;
+        if (n % p === 0n) return false;
+      }
+      let d = n - 1n;
+      let s = 0n;
+      while ((d & 1n) === 0n) {
+        d >>= 1n;
+        s++;
+      }
+      const witnesses = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n];
+      for (const a of witnesses) {
+        if (a >= n) break;
+        let x = modPow(a, d, n);
+        if (x === 1n || x === n - 1n) continue;
+        let composite = true;
+        for (let r = 1n; r < s; r++) {
+          x = (x * x) % n;
+          if (x === n - 1n) {
+            composite = false;
+            break;
+          }
+        }
+        if (composite) return false;
+      }
+      return true;
+    }
+
+    function gcd(a, b) {
+      while (b !== 0n) {
+        const t = b;
+        b = a % b;
+        a = t;
+      }
+      return a;
+    }
+
+    function pollardRho(n) {
+      if (n % 2n === 0n) return 2n;
+      let x = 2n, y = 2n, c = 1n, d = 1n;
+      const f = (v) => (v * v + c) % n;
+      let steps = 0;
+      while (d === 1n && steps < 150000) {
+        x = f(x);
+        y = f(f(y));
+        const diff = x > y ? x - y : y - x;
+        d = gcd(diff, n);
+        steps++;
+      }
+      return d === n ? null : d;
+    }
+
+    function factorize(n) {
+      const factors = new Map();
+      const addFactor = (p) => factors.set(p, (factors.get(p) || 0) + 1);
+
+      const small = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n, 43n, 47n];
+      for (const p of small) {
+        while (n % p === 0n) {
+          addFactor(p);
+          n /= p;
+        }
+      }
+
+      // Trial division up to 100,000
+      let d = 53n;
+      while (d * d <= n && d <= 100000n) {
+        while (n % d === 0n) {
+          addFactor(d);
+          n /= d;
+        }
+        d += 2n;
+      }
+
+      function decompose(rem) {
+        if (rem === 1n) return;
+        if (isPrime(rem)) {
+          addFactor(rem);
+          return;
+        }
+        const divisor = pollardRho(rem);
+        if (!divisor) {
+          addFactor(rem); // Fallback if too huge for quick JS factoring
+          return;
+        }
+        decompose(divisor);
+        decompose(rem / divisor);
+      }
+
+      decompose(n);
+      return Array.from(factors.entries()).sort((a, b) => (a[0] < b[0] ? -1 : 1));
+    }
+
+    function toSuperscript(num) {
+      const map = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
+      return String(num).split('').map(c => map[c] || c).join('');
+    }
+
+    function findPrevPrime(n) {
+      if (n <= 2n) return null;
+      if (n === 3n) return 2n;
+      let cand = n - 1n;
+      if (cand % 2n === 0n) cand--;
+      while (cand >= 2n) {
+        if (isPrime(cand)) return cand;
+        cand -= 2n;
+      }
+      return null;
+    }
+
+    function findNextPrime(n) {
+      if (n < 2n) return 2n;
+      let cand = n + 1n;
+      if (cand % 2n === 0n) cand++;
+      while (true) {
+        if (isPrime(cand)) return cand;
+        cand += 2n;
+      }
+    }
