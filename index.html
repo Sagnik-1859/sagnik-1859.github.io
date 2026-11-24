@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sagnik Datta — Interactive Math, Physics & Code Projects</title>
+  <style>
+    :root {
+      --bg: #0b0f19;
+      --surface: #131a2a;
+      --surface-hover: #1a2338;
+      --border: #232f4b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --badge-bg: rgba(56, 189, 248, 0.12);
+      --green: #34d399;
+      --purple: #a78bfa;
+      --amber: #fbbf24;
+    }
+
+    [data-theme="light"] {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-hover: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #475569;
+      --accent: #0284c7;
+      --accent-glow: rgba(2, 132, 199, 0.18);
+      --badge-bg: rgba(2, 132, 199, 0.1);
+      --green: #059669;
+      --purple: #7c3aed;
+      --amber: #d97706;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(12px);
+      background: color-mix(in srgb, var(--bg) 82%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+    }
+
+    .brand {
+      font-weight: 700;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0b0f19;
+      border-color: var(--accent);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+      background: var(--accent);
+      color: #0b0f19;
+    }
+
+    /* Hero */
+    .hero {
+      padding: 4.5rem 0 3rem;
+      text-align: center;
+    }
+
+    .hero-pill {
+      display: inline-block;
+      padding: 0.35rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--badge-bg);
+      color: var(--accent);
+      border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.25rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      max-width: 620px;
+      margin: 0 auto 2rem;
+      color: var(--text-muted);
+      font-size: 1.08rem;
+    }
+
+    /* Filter Bar */
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active,
+    .filter-btn:hover {
+      background: var(--badge-bg);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Grid */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+      box-shadow: 0 12px 30px -12px var(--accent-glow);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .card-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      font-size: 1.25rem;
+      font-weight: 700;
+      background: var(--badge-bg);
+      color: var(--accent);
+    }
+
+    .status-badge {
+      font-size: 0.74rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+    }
+
+    .status-live {
+      background: rgba(52, 211, 153, 0.14);
+      color: var(--green);
+    }
+
+    .status-soon {
+      background: rgba(251, 191, 36, 0.14);
+      color: var(--amber);
+    }
+
+    .card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.01em;
+    }
+
+    .card p {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-bottom: 1.35rem;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .card-footer {
+      display: flex;
+      gap: 0.65rem;
+    }
+
+    .card-footer .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-disabled {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 0;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: none;
+      place-items: center;
+      padding: 1rem;
+      z-index: 100;
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      max-width: 520px;
+      width: 100%;
+      padding: 1.5rem;
+    }
+
+    .modal h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .form-group {
+      margin-bottom: 0.9rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+      color: var(--text-muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 0.9rem;
+    }
+
+    .code-output {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+      white-space: pre-wrap;
+      max-height: 150px;
+      overflow-y: auto;
+      margin-top: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <span class="brand-dot"></span>
+        Sagnik Datta
+      </a>
+      <div class="nav-actions">
+        <button class="btn" id="openModalBtn">+ Add Project Card</button>
+        <button class="btn" id="themeToggle" aria-label="Toggle theme">☀️ Light</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="hero-pill">sagnik-1859.github.io</div>
+      <h1>Interactive Tools in <span>Math, Physics & Code</span></h1>
+      <p>
+        A growing collection of browser-based computational utilities, algorithm visualizers, and analytical problem solvers built from first principles.
+      </p>
+      <a href="./prime-checker/index.html" class="btn btn-primary">Launch Prime Checker →</a>
+    </section>
+
+    <div class="toolbar">
+      <div class="filters">
+        <button class="filter-btn active" data-filter="all">All Projects</button>
+        <button class="filter-btn" data-filter="math">Mathematics</button>
+        <button class="filter-btn" data-filter="physics">Physics</button>
+        <button class="filter-btn" data-filter="tools">Utilities</button>
+      </div>
+      <span style="font-size: 0.85rem; color: var(--text-muted);" id="projectCount">Showing 3 projects</span>
+    </div>
+
+    <section class="projects-grid" id="projectsGrid">
+      <!-- Featured Live Project -->
+      <article class="card" data-category="math">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">ℙ</div>
+            <span class="status-badge status-live">● Live</span>
+          </div>
+          <h3>Arbitrary-Precision Prime Checker</h3>
+          <p>
+            Fast primality tester supporting up to 500-digit BigInt numbers via Miller-Rabin, complete prime factorization, and nearest prime lookup.
+          </p>
+          <div class="tags">
+            <span class="tag">Number Theory</span>
+            <span class="tag">Miller-Rabin</span>
+            <span class="tag">BigInt JS</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="./prime-checker/index.html" class="btn btn-primary">Launch App</a>
+        </div>
+      </article>
+
+      <!-- Upcoming Template 1 -->
+      <article class="card" data-category="math">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">∫</div>
+            <span class="status-badge status-soon">Planned</span>
+          </div>
+          <h3>Real Analysis & Calculus Explorer</h3>
+          <p>
+            Interactive epsilon-delta continuity visualizer, Taylor series approximator, and numerical integration workbench.
+          </p>
+          <div class="tags">
+            <span class="tag">Real Analysis</span>
+            <span class="tag">Calculus</span>
+            <span class="tag">Canvas API</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="btn btn-disabled">Coming Soon</span>
+        </div>
+      </article>
+
+      <!-- Upcoming Template 2 -->
+      <article class="card" data-category="physics">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">⚛</div>
+            <span class="status-badge status-soon">Planned</span>
+          </div>
+          <h3>Classical Mechanics & Equilibrium Lab</h3>
+          <p>
+            Interactive projectile trajectories, coupled oscillator simulations, and chemical equilibrium shift calculators.
+          </p>
+          <div class="tags">
+            <span class="tag">Physics</span>
+            <span class="tag">Simulation</span>
+            <span class="tag">Equilibrium</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <span class="btn btn-disabled">Coming Soon</span>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      Built by <strong>Sagnik Datta</strong> · Hosted on GitHub Pages (<code>sagnik-1859.github.io</code>)
+    </div>
+  </footer>
+
+  <!-- Project Card Snippet Generator Modal -->
+  <div class="modal-backdrop" id="cardModal">
+    <div class="modal">
+      <h2>Generate New Project Card HTML</h2>
+      <div class="form-group">
+        <label>Project Title</label>
+        <input type="text" id="pTitle" placeholder="e.g., Matrix Eigenvalue Solver" />
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="pCat">
+          <option value="math">Mathematics</option>
+          <option value="physics">Physics</option>
+          <option value="tools">Utilities</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Folder Path (relative URL)</label>
+        <input type="text" id="pPath" placeholder="./matrix-solver/index.html" />
+      </div>
+      <div class="form-group">
+        <label>Short Description</label>
+        <textarea id="pDesc" rows="2" placeholder="Computes eigenvalues and eigenvectors step by step..."></textarea>
+      </div>
+      <div style="display: flex; gap: 0.5rem; justify-content: flex-end;">
+        <button class="btn" id="closeModalBtn">Close</button>
+        <button class="btn btn-primary" id="copyCardBtn">Copy HTML Snippet</button>
+      </div>
+      <pre class="code-output" id="snippetOutput"></pre>
+    </div>
+  </div>
+
+  <script>
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    themeToggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeToggle.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
+    });
+
+    // Category filter
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+    const projectCount = document.getElementById('projectCount');
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = btn.dataset.filter;
+        let visible = 0;
+        cards.forEach(card => {
+          const show = filter === 'all' || card.dataset.category === filter;
+          card.style.display = show ? 'flex' : 'none';
+          if (show) visible++;
+        });
+        projectCount.textContent = `Showing ${visible} project${visible === 1 ? '' : 's'}`;
+      });
+    });
+
+    // Modal snippet generator
+    const modal = document.getElementById('cardModal');
+    const openModalBtn = document.getElementById('openModalBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const copyCardBtn = document.getElementById('copyCardBtn');
+    const snippetOutput = document.getElementById('snippetOutput');
+
+    function updateSnippet() {
+      const title = document.getElementById('pTitle').value || 'New Project';
+      const cat = document.getElementById('pCat').value;
+      const path = document.getElementById('pPath').value || './new-project/index.html';
+      const desc = document.getElementById('pDesc').value || 'Interactive project built in HTML/JS.';
+      snippetOutput.textContent = `<article class="card" data-category="${cat}">
+  <div>
+    <div class="card-top">
+      <div class="card-icon">★</div>
+      <span class="status-badge status-live">● Live</span>
+    </div>
+    <h3>${title}</h3>
+    <p>${desc}</p>
+  </div>
+  <div class="card-footer">
+    <a href="${path}" class="btn btn-primary">Launch App</a>
+  </div>
+</article>`;
+    }
+
+    ['pTitle', 'pCat', 'pPath', 'pDesc'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateSnippet);
+    });
+
+    openModalBtn.addEventListener('click', () => {
+      updateSnippet();
+      modal.classList.add('open');
+    });
+
+    closeModalBtn.addEventListener('click', () => modal.classList.remove('open'));
+
+    copyCardBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(snippetOutput.textContent);
+      copyCardBtn.textContent = 'Copied!';
+      setTimeout(() => (copyCardBtn.textContent = 'Copy HTML Snippet'), 1500);
+    });
+  </script>
+</body>
+</html>
