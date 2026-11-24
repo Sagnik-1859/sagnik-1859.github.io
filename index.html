@@ -100,6 +100,10 @@
       gap: 0.75rem;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     .btn {
       display: inline-flex;
       align-items: center;
@@ -400,7 +404,7 @@
         Sagnik Datta
       </a>
       <div class="nav-actions">
-        <button class="btn" id="openModalBtn">+ Add Project Card</button>
+        <button class="btn" id="openModalBtn" hidden>+ Add Project Card</button>
         <button class="btn" id="themeToggle" aria-label="Toggle theme">☀️ Light</button>
       </div>
     </div>
@@ -423,7 +427,7 @@
         <button class="filter-btn" data-filter="physics">Physics</button>
         <button class="filter-btn" data-filter="tools">Utilities</button>
       </div>
-      <span style="font-size: 0.85rem; color: var(--text-muted);" id="projectCount">Showing 3 projects</span>
+      <span style="font-size: 0.85rem; color: var(--text-muted);" id="projectCount">Showing 6 projects</span>
     </div>
 
     <section class="projects-grid" id="projectsGrid">
@@ -446,6 +450,69 @@
         </div>
         <div class="card-footer">
           <a href="./prime-checker/index.html" class="btn btn-primary">Launch App</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="tools">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">∑</div>
+            <span class="status-badge status-live">● Live</span>
+          </div>
+          <h3>Scientific Calculator</h3>
+          <p>
+            Wolfram-style calculator: variables, custom functions, units, matrices, complex numbers, derivatives, numeric integrals and root solving.
+          </p>
+          <div class="tags">
+            <span class="tag">Calculator</span>
+            <span class="tag">Calculus</span>
+            <span class="tag">math.js</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="./calculator/index.html" class="btn btn-primary">Launch App</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="math">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">ƒ</div>
+            <span class="status-badge status-live">● Live</span>
+          </div>
+          <h3>Plot Lab</h3>
+          <p>
+            Desmos-style graphing: multiple functions, auto-generated parameter sliders, drag to pan and pinch or scroll to zoom.
+          </p>
+          <div class="tags">
+            <span class="tag">Plotting</span>
+            <span class="tag">Functions</span>
+            <span class="tag">Canvas API</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="./plot-lab/index.html" class="btn btn-primary">Launch App</a>
+        </div>
+      </article>
+
+      <article class="card" data-category="math">
+        <div>
+          <div class="card-top">
+            <div class="card-icon">◈</div>
+            <span class="status-badge status-live">● Live</span>
+          </div>
+          <h3>3D Surface Lab</h3>
+          <p>
+            Plot z = f(x, y), orbit it with your finger, snap to top, front, side or isometric views, toggle perspective, and see symbolic partial derivatives.
+          </p>
+          <div class="tags">
+            <span class="tag">3D</span>
+            <span class="tag">Multivariable</span>
+            <span class="tag">Canvas API</span>
+          </div>
+        </div>
+        <div class="card-footer">
+          <a href="./plot-3d/index.html" class="btn btn-primary">Launch App</a>
         </div>
       </article>
 
@@ -566,6 +633,14 @@
     // Modal snippet generator
     const modal = document.getElementById('cardModal');
     const openModalBtn = document.getElementById('openModalBtn');
+
+    // Dev-only: visit yoursite/?dev=1 once to enable on this device, ?dev=0 to disable
+    try {
+      const flag = new URLSearchParams(location.search).get('dev');
+      if (flag === '1') localStorage.setItem('devMode', '1');
+      if (flag === '0') localStorage.removeItem('devMode');
+      if (localStorage.getItem('devMode') === '1') openModalBtn.hidden = false;
+    } catch (e) {}
     const closeModalBtn = document.getElementById('closeModalBtn');
     const copyCardBtn = document.getElementById('copyCardBtn');
     const snippetOutput = document.getElementById('snippetOutput');
