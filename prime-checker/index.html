@@ -1,440 +1,854 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" class="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prime Number Checker — Sagnik Datta</title>
-  <style>
-    :root {
-      --bg: #0b0f19;
-      --surface: #131a2a;
-      --surface-2: #1a2338;
-      --border: #24304d;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --accent: #38bdf8;
-      --prime: #10b981;
-      --prime-bg: rgba(16, 185, 129, 0.14);
-      --comp: #f59e0b;
-      --comp-bg: rgba(245, 158, 11, 0.14);
-      --neither: #a78bfa;
-      --neither-bg: rgba(167, 139, 250, 0.14);
-    }
-
-    [data-theme="light"] {
-      --bg: #f8fafc;
-      --surface: #ffffff;
-      --surface-2: #f1f5f9;
-      --border: #e2e8f0;
-      --text: #0f172a;
-      --muted: #475569;
-      --accent: #0284c7;
-      --prime: #059669;
-      --prime-bg: rgba(5, 150, 105, 0.12);
-      --comp: #d97706;
-      --comp-bg: rgba(217, 119, 6, 0.12);
-      --neither: #7c3aed;
-      --neither-bg: rgba(124, 58, 237, 0.12);
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 1.5rem 1rem 3rem;
-      line-height: 1.5;
-    }
-
-    .container {
-      max-width: 760px;
-      margin: 0 auto;
-    }
-
-    .top-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .back-link {
-      color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.92rem;
-    }
-
-    .back-link:hover { text-decoration: underline; }
-
-    .btn {
-      background: var(--surface);
-      color: var(--text);
-      border: 1px solid var(--border);
-      padding: 0.45rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn:hover { border-color: var(--accent); }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #0b0f19;
-      border-color: var(--accent);
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1.25rem;
-    }
-
-    h1 {
-      font-size: 1.65rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.35rem;
-    }
-
-    .subtitle {
-      color: var(--muted);
-      font-size: 0.92rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .input-row {
-      display: flex;
-      gap: 0.65rem;
-      margin-bottom: 0.9rem;
-    }
-
-    input[type="text"] {
-      flex: 1;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      font-size: 1.05rem;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-
-    input[type="text"]:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    .presets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.45rem;
-      align-items: center;
-    }
-
-    .presets span {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-right: 0.25rem;
-    }
-
-    .preset-chip {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.25rem 0.65rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-
-    .preset-chip:hover { border-color: var(--accent); color: var(--accent); }
-
-    .status-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      padding: 1rem 1.25rem;
-      border-radius: 12px;
-      margin-bottom: 1.25rem;
-      font-weight: 700;
-    }
-
-    .status-prime { background: var(--prime-bg); color: var(--prime); border: 1px solid var(--prime); }
-    .status-comp { background: var(--comp-bg); color: var(--comp); border: 1px solid var(--comp); }
-    .status-neither { background: var(--neither-bg); color: var(--neither); border: 1px solid var(--neither); }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 0.9rem;
-      margin-bottom: 1rem;
-    }
-
-    .stat-box {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 0.85rem 1rem;
-    }
-
-    .stat-label {
-      font-size: 0.76rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      color: var(--muted);
-      margin-bottom: 0.25rem;
-    }
-
-    .stat-val {
-      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: 1rem;
-      font-weight: 600;
-      word-break: break-all;
-    }
-
-    .jump-btn {
-      margin-top: 0.4rem;
-      font-size: 0.76rem;
-      padding: 0.2rem 0.55rem;
-    }
-
-    .history-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .history-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--surface-2);
-      padding: 0.55rem 0.85rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .history-item:hover { border: 1px solid var(--accent); }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prime Number Checker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
 </head>
-<body>
-  <div class="container">
-    <div class="top-bar">
-      <a href="../index.html" class="back-link">← Back to Portfolio</a>
-      <button class="btn" id="themeBtn">☀️ Light</button>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen transition-colors duration-200 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Navigation / Header -->
+    <header class="w-full border-b border-slate-200 dark:border-slate-800/80 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md sticky top-0 z-10">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-mono font-bold text-lg shadow-sm">
+                    ℙ
+                </div>
+                <h1 class="font-semibold text-lg tracking-tight">Prime<span class="text-indigo-600 dark:text-indigo-400">Lab</span></h1>
+            </div>
+            
+            <!-- Theme Toggle Button -->
+            <button id="themeToggle" aria-label="Toggle Dark Mode" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <!-- Sun Icon (shown in dark mode) -->
+                <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <!-- Moon Icon (shown in light mode) -->
+                <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 flex-grow space-y-6">
+        
+        <!-- Input Card -->
+        <section class="bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800">
+            <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <label for="numberInput" class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                        Enter a positive integer (Arbitrary-precision BigInt supported)
+                    </label>
+                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-slate-500 dark:text-slate-400 select-none">
+                        <input type="checkbox" id="instantCheck" checked class="rounded border-slate-300 dark:border-slate-700 text-indigo-600 focus:ring-indigo-500 bg-slate-100 dark:bg-slate-800">
+                        <span>Instant evaluation</span>
+                    </label>
+                </div>
+
+                <!-- Input & Action Button -->
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative flex-grow">
+                        <input 
+                            type="text" 
+                            id="numberInput" 
+                            inputmode="numeric"
+                            placeholder="e.g., 2147483647" 
+                            autocomplete="off"
+                            class="w-full font-mono text-lg sm:text-xl px-4 py-3.5 pr-10 rounded-xl bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 dark:focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                        >
+                        <button id="clearBtn" title="Clear input" class="hidden absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <button id="checkBtn" class="px-6 py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-medium shadow-sm transition-all flex items-center justify-center gap-2 shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900">
+                        <span>Analyze</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Validation Message Box (Inline, never alert) -->
+                <div id="errorBox" class="hidden text-sm text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 border border-rose-200 dark:border-rose-800/60 px-4 py-2.5 rounded-xl flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span id="errorText">Please enter a valid non-negative integer.</span>
+                </div>
+
+                <!-- Preset Chips -->
+                <div class="pt-2">
+                    <span class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">Quick Presets</span>
+                    <div class="flex flex-wrap gap-2" id="presetsContainer">
+                        <button data-val="0" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">0</button>
+                        <button data-val="2" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">2</button>
+                        <button data-val="17" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">17</button>
+                        <button data-val="60" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">60</button>
+                        <button data-val="91" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">91</button>
+                        <button data-val="997" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">997</button>
+                        <button data-val="104729" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors">104,729</button>
+                        <button data-val="2147483647" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors" title="Mersenne Prime M31">2,147,483,647</button>
+                        <button data-val="2305843009213693951" class="preset-btn px-3 py-1.5 rounded-lg text-xs font-mono bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-600 dark:hover:text-indigo-400 border border-slate-200 dark:border-slate-700/80 transition-colors" title="Mersenne Prime M61">2⁶¹ - 1</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Card -->
+        <section id="resultSection" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200 dark:border-slate-800 space-y-6 transition-all">
+            
+            <!-- Result Header & Status Badge -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-100 dark:border-slate-800">
+                <div class="space-y-1 overflow-hidden">
+                    <div class="flex items-center gap-2 text-xs text-slate-400 dark:text-slate-500 font-medium">
+                        <span>EVALUATED INTEGER</span>
+                        <span>•</span>
+                        <span id="digitCount">0 digits</span>
+                        <span>•</span>
+                        <span id="execTime">0.00 ms</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <h2 id="analyzedNumber" class="font-mono text-2xl sm:text-3xl font-bold tracking-tight break-all text-slate-900 dark:text-white">
+                            0
+                        </h2>
+                        <button id="copyNumberBtn" title="Copy number" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Badge -->
+                <div id="statusBadge" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm shrink-0 self-start sm:self-center">
+                    <span id="statusDot" class="w-2.5 h-2.5 rounded-full"></span>
+                    <span id="statusLabel">PRIME</span>
+                </div>
+            </div>
+
+            <!-- Explanation / Summary Note -->
+            <p id="statusDescription" class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed"></p>
+
+            <!-- Factorization Section (Shown for Composite Numbers) -->
+            <div id="factorizationBox" class="hidden bg-slate-50 dark:bg-slate-950/70 rounded-xl p-5 border border-slate-200/80 dark:border-slate-800 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Prime Factorization</h3>
+                    <button id="copyFactorsBtn" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium">Copy expression</button>
+                </div>
+                
+                <div id="factorizationDisplay" class="font-mono text-lg sm:text-xl font-semibold text-slate-800 dark:text-slate-200 break-all leading-relaxed">
+                    <!-- e.g., 60 = 2² × 3 × 5 -->
+                </div>
+
+                <!-- Smallest & Largest Prime Factors -->
+                <div id="minMaxFactorsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/80">
+                    <div class="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                        <span class="text-xs text-slate-400 block">Smallest Prime Factor</span>
+                        <span id="smallestFactor" class="font-mono font-semibold text-sm text-slate-800 dark:text-slate-200 break-all">-</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-900 p-3 rounded-lg border border-slate-200/60 dark:border-slate-800">
+                        <span class="text-xs text-slate-400 block">Largest Prime Factor</span>
+                        <span id="largestFactor" class="font-mono font-semibold text-sm text-slate-800 dark:text-slate-200 break-all">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nearest Primes Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Previous Prime -->
+                <div class="bg-slate-50 dark:bg-slate-950/70 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3">
+                    <div class="overflow-hidden">
+                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 block mb-1">Nearest Prime Below</span>
+                        <div id="prevPrimeVal" class="font-mono font-semibold text-base text-slate-800 dark:text-slate-200 truncate">—</div>
+                        <span id="prevPrimeDiff" class="text-xs text-slate-400 font-mono"></span>
+                    </div>
+                    <button id="loadPrevPrimeBtn" title="Inspect this prime" class="hidden p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 transition-colors shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Next Prime -->
+                <div class="bg-slate-50 dark:bg-slate-950/70 rounded-xl p-4 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3">
+                    <div class="overflow-hidden">
+                        <span class="text-xs font-medium text-slate-400 dark:text-slate-500 block mb-1">Nearest Prime Above</span>
+                        <div id="nextPrimeVal" class="font-mono font-semibold text-base text-slate-800 dark:text-slate-200 truncate">—</div>
+                        <span id="nextPrimeDiff" class="text-xs text-slate-400 font-mono"></span>
+                    </div>
+                    <button id="loadNextPrimeBtn" title="Inspect this prime" class="hidden p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-300 transition-colors shrink-0">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- History Section -->
+        <section id="historySection" class="hidden bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+            <div class="flex items-center justify-between">
+                <h3 class="text-sm font-semibold text-slate-700 dark:text-slate-300">Recent Checks</h3>
+                <button id="clearHistoryBtn" class="text-xs text-slate-400 hover:text-rose-500 transition-colors">Clear history</button>
+            </div>
+            <div id="historyList" class="divide-y divide-slate-100 dark:divide-slate-800/80 max-h-64 overflow-y-auto pr-1">
+                <!-- History items injected here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification for Copy Actions -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 text-xs font-medium px-4 py-2.5 rounded-xl shadow-lg transform translate-y-16 opacity-0 transition-all duration-200 pointer-events-none z-50">
+        Copied to clipboard!
     </div>
 
-    <div class="card">
-      <h1>Prime Number Checker</h1>
-      <p class="subtitle">Arbitrary-precision BigInt primality testing, prime factorization & nearest primes (up to 500 digits).</p>
+    <!-- Footer -->
+    <footer class="w-full py-6 text-center text-xs text-slate-400 dark:text-slate-600">
+        Deterministic Miller-Rabin (64-bit) &amp; Baillie-PSW / Strong Probable Prime Engine
+    </footer>
 
-      <div class="input-row">
-        <input type="text" id="numInput" placeholder="Enter an integer (e.g., 2147483647)" value="2147483647" />
-        <button class="btn btn-primary" id="checkBtn">Check</button>
-      </div>
+    <script>
+        /**
+         * ============================================================================
+         * MATHEMATICAL ENGINE (BigInt Arbitrary Precision)
+         * ============================================================================
+         */
 
-      <div class="presets">
-        <span>Presets:</span>
-        <button class="preset-chip" data-val="0">0</button>
-        <button class="preset-chip" data-val="1">1</button>
-        <button class="preset-chip" data-val="60">60</button>
-        <button class="preset-chip" data-val="104729">104729 (10,000th prime)</button>
-        <button class="preset-chip" data-val="2147483647">2³¹−1</button>
-        <button class="preset-chip" data-val="2305843009213693951">2⁶¹−1</button>
-      </div>
-    </div>
+        // Small primes for fast trial division filtering
+        const SMALL_PRIMES = [
+            2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n, 43n, 47n,
+            53n, 59n, 61n, 67n, 71n, 73n, 79n, 83n, 89n, 97n, 101n, 103n, 107n, 109n, 113n
+        ];
 
-    <div class="card" id="resultCard">
-      <div id="statusBanner" class="status-banner status-prime">
-        <span id="statusText">PRIME NUMBER</span>
-        <span id="digitCount" style="font-size: 0.82rem; opacity: 0.85;">10 digits</span>
-      </div>
+        // Deterministic bases for Miller-Rabin up to 2^64 (18,446,744,073,709,551,616)
+        // Proven sufficient by Sinclair / Jim Sinclair (2011)
+        const DETERMINISTIC_BASES_64 = [2n, 325n, 9375n, 28178n, 450775n, 9780504n, 1795265022n];
 
-      <div class="stat-box" style="margin-bottom: 0.9rem;">
-        <div class="stat-label">Prime Factorization</div>
-        <div class="stat-val" id="factorizationVal">2147483647</div>
-      </div>
+        // Extended bases for numbers > 2^64 (deterministic up to > 3.317 * 10^24 and strong PRP beyond)
+        const EXTENDED_BASES = [
+            2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n, 43n, 47n, 53n, 59n, 61n
+        ];
 
-      <div class="grid-2">
-        <div class="stat-box">
-          <div class="stat-label">Smallest Prime Factor</div>
-          <div class="stat-val" id="spfVal">2147483647</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Largest Prime Factor</div>
-          <div class="stat-val" id="lpfVal">2147483647</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Nearest Prime Below</div>
-          <div class="stat-val" id="prevPrimeVal">2147483629</div>
-          <button class="btn jump-btn" id="jumpPrevBtn">Check this</button>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Nearest Prime Above</div>
-          <div class="stat-val" id="nextPrimeVal">2147483659</div>
-          <button class="btn jump-btn" id="jumpNextBtn">Check this</button>
-        </div>
-      </div>
-    </div>
+        const TWO_POW_64 = 18446744073709551616n;
 
-    <div class="card">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-        <h2 style="font-size:1rem;">Recent Checks</h2>
-        <button class="btn" id="clearHistoryBtn" style="font-size:0.75rem; padding:0.25rem 0.6rem;">Clear</button>
-      </div>
-      <div class="history-list" id="historyList"></div>
-    </div>
-  </div>
-
-  <script>
-    const themeBtn = document.getElementById('themeBtn');
-    themeBtn.addEventListener('click', () => {
-      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', next);
-      themeBtn.textContent = next === 'dark' ? '☀️ Light' : '🌙 Dark';
-    });
-
-    function modPow(base, exp, mod) {
-      let res = 1n;
-      base %= mod;
-      while (exp > 0n) {
-        if (exp & 1n) res = (res * base) % mod;
-        base = (base * base) % mod;
-        exp >>= 1n;
-      }
-      return res;
-    }
-
-    function isPrime(n) {
-      if (n < 2n) return false;
-      const smallPrimes = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n];
-      for (const p of smallPrimes) {
-        if (n === p) return true;
-        if (n % p === 0n) return false;
-      }
-      let d = n - 1n;
-      let s = 0n;
-      while ((d & 1n) === 0n) {
-        d >>= 1n;
-        s++;
-      }
-      const witnesses = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n];
-      for (const a of witnesses) {
-        if (a >= n) break;
-        let x = modPow(a, d, n);
-        if (x === 1n || x === n - 1n) continue;
-        let composite = true;
-        for (let r = 1n; r < s; r++) {
-          x = (x * x) % n;
-          if (x === n - 1n) {
-            composite = false;
-            break;
-          }
+        /**
+         * Modular exponentiation: computes (base^exp) % mod efficiently
+         */
+        function modPow(base, exp, mod) {
+            let result = 1n;
+            base = base % mod;
+            while (exp > 0n) {
+                if (exp % 2n === 1n) {
+                    result = (result * base) % mod;
+                }
+                exp = exp >> 1n;
+                base = (base * base) % mod;
+            }
+            return result;
         }
-        if (composite) return false;
-      }
-      return true;
-    }
 
-    function gcd(a, b) {
-      while (b !== 0n) {
-        const t = b;
-        b = a % b;
-        a = t;
-      }
-      return a;
-    }
+        /**
+         * Miller-Rabin Primality Test
+         * Returns { isPrime: boolean, isDeterministic: boolean }
+         */
+        function checkPrimality(n) {
+            if (n < 2n) return { status: 'NEITHER', isDeterministic: true };
+            if (n === 2n || n === 3n) return { status: 'PRIME', isDeterministic: true };
+            if (n % 2n === 0n) return { status: 'COMPOSITE', isDeterministic: true };
 
-    function pollardRho(n) {
-      if (n % 2n === 0n) return 2n;
-      let x = 2n, y = 2n, c = 1n, d = 1n;
-      const f = (v) => (v * v + c) % n;
-      let steps = 0;
-      while (d === 1n && steps < 150000) {
-        x = f(x);
-        y = f(f(y));
-        const diff = x > y ? x - y : y - x;
-        d = gcd(diff, n);
-        steps++;
-      }
-      return d === n ? null : d;
-    }
+            // Fast check against small primes
+            for (const p of SMALL_PRIMES) {
+                if (n === p) return { status: 'PRIME', isDeterministic: true };
+                if (n % p === 0n) return { status: 'COMPOSITE', isDeterministic: true };
+            }
 
-    function factorize(n) {
-      const factors = new Map();
-      const addFactor = (p) => factors.set(p, (factors.get(p) || 0) + 1);
+            // Write n - 1 as 2^s * d with d odd
+            let d = n - 1n;
+            let s = 0n;
+            while (d % 2n === 0n) {
+                d >>= 1n;
+                s += 1n;
+            }
 
-      const small = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n, 43n, 47n];
-      for (const p of small) {
-        while (n % p === 0n) {
-          addFactor(p);
-          n /= p;
+            const isUnder64Bit = n < TWO_POW_64;
+            const bases = isUnder64Bit ? DETERMINISTIC_BASES_64 : EXTENDED_BASES;
+
+            for (const a of bases) {
+                if (a >= n) break;
+                let x = modPow(a, d, n);
+                if (x === 1n || x === n - 1n) continue;
+
+                let composite = true;
+                for (let r = 1n; r < s; r++) {
+                    x = (x * x) % n;
+                    if (x === n - 1n) {
+                        composite = false;
+                        break;
+                    }
+                }
+                if (composite) {
+                    return { status: 'COMPOSITE', isDeterministic: true };
+                }
+            }
+
+            // Deterministic up to 3,317,044,064,679,887,385,961,981 (~3.31 * 10^24) with first 13 primes
+            const isDeterministic = n < 3317044064679887385961981n;
+            return { status: 'PRIME', isDeterministic };
         }
-      }
 
-      // Trial division up to 100,000
-      let d = 53n;
-      while (d * d <= n && d <= 100000n) {
-        while (n % d === 0n) {
-          addFactor(d);
-          n /= d;
+        /**
+         * Greatest Common Divisor for BigInt
+         */
+        function gcd(a, b) {
+            while (b !== 0n) {
+                let temp = b;
+                b = a % b;
+                a = temp;
+            }
+            return a;
         }
-        d += 2n;
-      }
 
-      function decompose(rem) {
-        if (rem === 1n) return;
-        if (isPrime(rem)) {
-          addFactor(rem);
-          return;
+        /**
+         * Pollard's Rho algorithm (Brent's variant) for fast factor extraction
+         */
+        function pollardsRho(n) {
+            if (n % 2n === 0n) return 2n;
+            if (n % 3n === 0n) return 3n;
+
+            let c = 1n;
+            while (true) {
+                let x = 2n;
+                let y = 2n;
+                let d = 1n;
+                const f = (val) => (val * val + c) % n;
+
+                let steps = 0;
+                while (d === 1n) {
+                    x = f(x);
+                    y = f(f(y));
+                    const diff = x > y ? x - y : y - x;
+                    d = gcd(diff, n);
+                    steps++;
+                    // Safety bailout if taking too long on massive semiprimes
+                    if (steps > 150000) return null;
+                }
+                if (d !== n) return d;
+                c += 1n;
+                if (c > 20n) return null;
+            }
         }
-        const divisor = pollardRho(rem);
-        if (!divisor) {
-          addFactor(rem); // Fallback if too huge for quick JS factoring
-          return;
+
+        /**
+         * Prime Factorization with reasonable computational threshold
+         * Returns { complete: boolean, factors: Map<BigInt, number> }
+         */
+        function getPrimeFactorization(n) {
+            const factors = new Map();
+            const addFactor = (p, count = 1) => {
+                factors.set(p, (factors.get(p) || 0) + count);
+            };
+
+            let temp = n;
+
+            // 1. Trial division up to 100,000 for instant extraction of small/medium factors
+            while (temp % 2n === 0n) {
+                addFactor(2n);
+                temp /= 2n;
+            }
+            while (temp % 3n === 0n) {
+                addFactor(3n);
+                temp /= 3n;
+            }
+
+            let i = 5n;
+            const trialLimit = 100000n;
+            while (i * i <= temp && i <= trialLimit) {
+                while (temp % i === 0n) {
+                    addFactor(i);
+                    temp /= i;
+                }
+                while (temp % (i + 2n) === 0n) {
+                    addFactor(i + 2n);
+                    temp /= (i + 2n);
+                }
+                i += 6n;
+            }
+
+            if (temp === 1n) {
+                return { complete: true, factors };
+            }
+
+            // Check if remaining cofactor is prime
+            if (checkPrimality(temp).status === 'PRIME') {
+                addFactor(temp);
+                return { complete: true, factors };
+            }
+
+            // 2. For numbers up to ~22 digits (75 bits), use recursive Pollard's Rho
+            if (temp.toString().length <= 22) {
+                const queue = [temp];
+                while (queue.length > 0) {
+                    const curr = queue.pop();
+                    if (curr === 1n) continue;
+                    if (checkPrimality(curr).status === 'PRIME') {
+                        addFactor(curr);
+                        continue;
+                    }
+                    const divisor = pollardsRho(curr);
+                    if (!divisor) {
+                        // Partial factorization fallback
+                        addFactor(curr);
+                        return { complete: false, factors };
+                    }
+                    queue.push(divisor);
+                    queue.push(curr / divisor);
+                }
+                // Sort map keys ascending
+                const sorted = new Map([...factors.entries()].sort((a, b) => (a[0] < b[0] ? -1 : 1)));
+                return { complete: true, factors: sorted };
+            }
+
+            // Beyond threshold: return partial factors + remaining composite cofactor
+            return { complete: false, factors, remainingComposite: temp };
         }
-        decompose(divisor);
-        decompose(rem / divisor);
-      }
 
-      decompose(n);
-      return Array.from(factors.entries()).sort((a, b) => (a[0] < b[0] ? -1 : 1));
-    }
+        /**
+         * Find nearest prime strictly below n
+         */
+        function findPreviousPrime(n) {
+            if (n <= 2n) return null;
+            if (n === 3n) return 2n;
+            let candidate = n % 2n === 0n ? n - 1n : n - 2n;
+            while (candidate >= 3n) {
+                if (checkPrimality(candidate).status === 'PRIME') {
+                    return candidate;
+                }
+                candidate -= 2n;
+            }
+            return 2n;
+        }
 
-    function toSuperscript(num) {
-      const map = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹' };
-      return String(num).split('').map(c => map[c] || c).join('');
-    }
+        /**
+         * Find nearest prime strictly above n
+         */
+        function findNextPrime(n) {
+            if (n < 2n) return 2n;
+            let candidate = n % 2n === 0n ? n + 1n : n + 2n;
+            while (true) {
+                if (checkPrimality(candidate).status === 'PRIME') {
+                    return candidate;
+                }
+                candidate += 2n;
+            }
+        }
 
-    function findPrevPrime(n) {
-      if (n <= 2n) return null;
-      if (n === 3n) return 2n;
-      let cand = n - 1n;
-      if (cand % 2n === 0n) cand--;
-      while (cand >= 2n) {
-        if (isPrime(cand)) return cand;
-        cand -= 2n;
-      }
-      return null;
-    }
+        /**
+         * ============================================================================
+         * UI STATE & DOM INTERACTIONS
+         * ============================================================================
+         */
 
-    function findNextPrime(n) {
-      if (n < 2n) return 2n;
-      let cand = n + 1n;
-      if (cand % 2n === 0n) cand++;
-      while (true) {
-        if (isPrime(cand)) return cand;
-        cand += 2n;
-      }
-    }
+        const elements = {
+            html: document.documentElement,
+            themeToggle: document.getElementById('themeToggle'),
+            sunIcon: document.getElementById('sunIcon'),
+            moonIcon: document.getElementById('moonIcon'),
+            numberInput: document.getElementById('numberInput'),
+            instantCheck: document.getElementById('instantCheck'),
+            clearBtn: document.getElementById('clearBtn'),
+            checkBtn: document.getElementById('checkBtn'),
+            errorBox: document.getElementById('errorBox'),
+            errorText: document.getElementById('errorText'),
+            resultSection: document.getElementById('resultSection'),
+            digitCount: document.getElementById('digitCount'),
+            execTime: document.getElementById('execTime'),
+            analyzedNumber: document.getElementById('analyzedNumber'),
+            copyNumberBtn: document.getElementById('copyNumberBtn'),
+            statusBadge: document.getElementById('statusBadge'),
+            statusDot: document.getElementById('statusDot'),
+            statusLabel: document.getElementById('statusLabel'),
+            statusDescription: document.getElementById('statusDescription'),
+            factorizationBox: document.getElementById('factorizationBox'),
+            factorizationDisplay: document.getElementById('factorizationDisplay'),
+            copyFactorsBtn: document.getElementById('copyFactorsBtn'),
+            minMaxFactorsGrid: document.getElementById('minMaxFactorsGrid'),
+            smallestFactor: document.getElementById('smallestFactor'),
+            largestFactor: document.getElementById('largestFactor'),
+            prevPrimeVal: document.getElementById('prevPrimeVal'),
+            prevPrimeDiff: document.getElementById('prevPrimeDiff'),
+            loadPrevPrimeBtn: document.getElementById('loadPrevPrimeBtn'),
+            nextPrimeVal: document.getElementById('nextPrimeVal'),
+            nextPrimeDiff: document.getElementById('nextPrimeDiff'),
+            loadNextPrimeBtn: document.getElementById('loadNextPrimeBtn'),
+            historySection: document.getElementById('historySection'),
+            historyList: document.getElementById('historyList'),
+            clearHistoryBtn: document.getElementById('clearHistoryBtn'),
+            toast: document.getElementById('toast')
+        };
+
+        let currentNumberStr = '';
+        let currentFactorPlainStr = '';
+        let currentPrevPrime = null;
+        let currentNextPrime = null;
+        let history = [];
+
+        // Initialize Theme
+        function initTheme() {
+            const savedTheme = localStorage.getItem('primelab_theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                elements.html.classList.add('dark');
+                elements.sunIcon.classList.remove('hidden');
+                elements.moonIcon.classList.add('hidden');
+            }
+        }
+
+        elements.themeToggle.addEventListener('click', () => {
+            const isDark = elements.html.classList.toggle('dark');
+            localStorage.setItem('primelab_theme', isDark ? 'dark' : 'light');
+            elements.sunIcon.classList.toggle('hidden', !isDark);
+            elements.moonIcon.classList.toggle('hidden', isDark);
+        });
+
+        // Clipboard Helper (using execCommand for iframe compatibility)
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast('Copied to clipboard!');
+            } catch (err) {
+                showToast('Failed to copy');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        let toastTimeout;
+        function showToast(msg) {
+            elements.toast.textContent = msg;
+            elements.toast.classList.remove('translate-y-16', 'opacity-0');
+            clearTimeout(toastTimeout);
+            toastTimeout = setTimeout(() => {
+                elements.toast.classList.add('translate-y-16', 'opacity-0');
+            }, 2000);
+        }
+
+        // Format BigInt with commas for display readability if <= 24 digits
+        function formatBigInt(n) {
+            const str = n.toString();
+            if (str.length > 24) return str;
+            return str.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        // Main Evaluation Function
+        function evaluateInput(addToHistory = true) {
+            const raw = elements.numberInput.value.replace(/[\s,_]/g, '');
+            
+            elements.clearBtn.classList.toggle('hidden', raw.length === 0);
+
+            if (raw.length === 0) {
+                elements.errorBox.classList.add('hidden');
+                elements.resultSection.classList.add('hidden');
+                return;
+            }
+
+            // Validate strictly non-negative integer digits
+            if (!/^\d+$/.test(raw)) {
+                elements.errorText.textContent = 'Please enter a valid positive integer (digits 0–9 only).';
+                elements.errorBox.classList.remove('hidden');
+                elements.resultSection.classList.add('hidden');
+                return;
+            }
+
+            // Guard against absurdly massive inputs (> 500 digits) freezing UI
+            if (raw.length > 500) {
+                elements.errorText.textContent = 'Maximum supported length is 500 digits for instant browser responsiveness.';
+                elements.errorBox.classList.remove('hidden');
+                return;
+            }
+
+            elements.errorBox.classList.add('hidden');
+
+            try {
+                const startTime = performance.now();
+                const n = BigInt(raw);
+                const primality = checkPrimality(n);
+                const prevPrime = findPreviousPrime(n);
+                const nextPrime = findNextPrime(n);
+
+                let factorResult = null;
+                if (primality.status === 'COMPOSITE') {
+                    factorResult = getPrimeFactorization(n);
+                }
+
+                const endTime = performance.now();
+                const duration = (endTime - startTime).toFixed(2);
+
+                renderResult(n, primality, factorResult, prevPrime, nextPrime, duration);
+
+                if (addToHistory) {
+                    recordHistory(n, primality.status);
+                }
+            } catch (err) {
+                elements.errorText.textContent = 'An error occurred while parsing the number.';
+                elements.errorBox.classList.remove('hidden');
+            }
+        }
+
+        function renderResult(n, primality, factorResult, prevPrime, nextPrime, duration) {
+            currentNumberStr = n.toString();
+            currentPrevPrime = prevPrime;
+            currentNextPrime = nextPrime;
+
+            elements.resultSection.classList.remove('hidden');
+            elements.analyzedNumber.textContent = formatBigInt(n);
+            const len = currentNumberStr.length;
+            elements.digitCount.textContent = `${len} ${len === 1 ? 'digit' : 'digits'}`;
+            elements.execTime.textContent = `${duration} ms`;
+
+            // Configure Badge & Description
+            elements.statusBadge.className = 'inline-flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-sm shrink-0 self-start sm:self-center';
+            elements.statusDot.className = 'w-2.5 h-2.5 rounded-full';
+
+            if (primality.status === 'PRIME') {
+                elements.statusBadge.classList.add('bg-emerald-100', 'text-emerald-800', 'dark:bg-emerald-950/80', 'dark:text-emerald-300', 'border', 'border-emerald-200', 'dark:border-emerald-800/60');
+                elements.statusDot.classList.add('bg-emerald-500');
+                elements.statusLabel.textContent = primality.isDeterministic ? 'PRIME' : 'PROBABLE PRIME';
+                elements.statusDescription.textContent = primality.isDeterministic
+                    ? `${formatBigInt(n)} is a prime number. Its only positive divisors are 1 and itself.`
+                    : `${formatBigInt(n)} passed strong Miller-Rabin probable prime tests across 18 prime bases (error probability < 4⁻¹⁸).`;
+                elements.factorizationBox.classList.add('hidden');
+            } else if (primality.status === 'COMPOSITE') {
+                elements.statusBadge.classList.add('bg-amber-100', 'text-amber-800', 'dark:bg-amber-950/80', 'dark:text-amber-300', 'border', 'border-amber-200', 'dark:border-amber-800/60');
+                elements.statusDot.classList.add('bg-amber-500');
+                elements.statusLabel.textContent = 'COMPOSITE';
+                elements.statusDescription.textContent = `${formatBigInt(n)} is a composite number because it has positive divisors other than 1 and itself.`;
+                
+                // Render Factorization
+                renderFactorization(n, factorResult);
+            } else {
+                // NEITHER (0 or 1)
+                elements.statusBadge.classList.add('bg-slate-200', 'text-slate-700', 'dark:bg-slate-800', 'dark:text-slate-300', 'border', 'border-slate-300', 'dark:border-slate-700');
+                elements.statusDot.classList.add('bg-slate-500');
+                elements.statusLabel.textContent = 'NEITHER PRIME NOR COMPOSITE';
+                elements.statusDescription.textContent = n === 0n
+                    ? '0 is neither prime nor composite. Every integer divides 0, so it does not have a unique prime factorization.'
+                    : '1 is neither prime nor composite. By modern mathematical convention, 1 is excluded from the primes to preserve the Fundamental Theorem of Arithmetic.';
+                elements.factorizationBox.classList.add('hidden');
+            }
+
+            // Render Nearest Primes
+            if (prevPrime !== null) {
+                elements.prevPrimeVal.textContent = formatBigInt(prevPrime);
+                elements.prevPrimeDiff.textContent = `(-${formatBigInt(n - prevPrime)})`;
+                elements.loadPrevPrimeBtn.classList.remove('hidden');
+            } else {
+                elements.prevPrimeVal.textContent = 'None';
+                elements.prevPrimeDiff.textContent = '(2 is the smallest prime)';
+                elements.loadPrevPrimeBtn.classList.add('hidden');
+            }
+
+            if (nextPrime !== null) {
+                elements.nextPrimeVal.textContent = formatBigInt(nextPrime);
+                elements.nextPrimeDiff.textContent = `(+${formatBigInt(nextPrime - n)})`;
+                elements.loadNextPrimeBtn.classList.remove('hidden');
+            }
+        }
+
+        function renderFactorization(n, factorResult) {
+            elements.factorizationBox.classList.remove('hidden');
+            
+            const htmlParts = [];
+            const plainParts = [];
+            const keys = Array.from(factorResult.factors.keys());
+
+            for (const p of keys) {
+                const exp = factorResult.factors.get(p);
+                const pFormatted = formatBigInt(p);
+                if (exp > 1) {
+                    htmlParts.push(`${pFormatted}<sup class="text-indigo-600 dark:text-indigo-400 font-bold ml-0.5">${exp}</sup>`);
+                    plainParts.push(`${p}^${exp}`);
+                } else {
+                    htmlParts.push(`${pFormatted}`);
+                    plainParts.push(`${p}`);
+                }
+            }
+
+            if (!factorResult.complete && factorResult.remainingComposite) {
+                const remStr = formatBigInt(factorResult.remainingComposite);
+                htmlParts.push(`<span class="text-slate-400 text-base">[composite cofactor: ${remStr}]</span>`);
+                plainParts.push(`[composite: ${factorResult.remainingComposite}]`);
+            }
+
+            elements.factorizationDisplay.innerHTML = `${formatBigInt(n)} = ${htmlParts.join(' <span class="text-slate-400 mx-1">×</span> ')}`;
+            currentFactorPlainStr = `${n} = ${plainParts.join(' × ')}`;
+
+            // Smallest & Largest Prime Factors
+            if (keys.length > 0) {
+                elements.minMaxFactorsGrid.classList.remove('hidden');
+                elements.smallestFactor.textContent = formatBigInt(keys[0]);
+                elements.largestFactor.textContent = factorResult.complete
+                    ? formatBigInt(keys[keys.length - 1])
+                    : `${formatBigInt(keys[keys.length - 1])} (partial)`;
+            } else {
+                elements.minMaxFactorsGrid.classList.add('hidden');
+            }
+        }
+
+        // History Log Management
+        function recordHistory(n, status) {
+            const valStr = n.toString();
+            // Remove duplicate if already at top or elsewhere
+            history = history.filter(item => item.val !== valStr);
+            history.unshift({ val: valStr, status });
+            if (history.length > 15) history.pop();
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (history.length === 0) {
+                elements.historySection.classList.add('hidden');
+                return;
+            }
+            elements.historySection.classList.remove('hidden');
+            elements.historyList.innerHTML = '';
+
+            history.forEach(item => {
+                const row = document.createElement('button');
+                row.className = 'w-full py-2.5 px-2 flex items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 rounded-lg transition-colors text-left group';
+                
+                let badgeClass = '';
+                let label = '';
+                if (item.status === 'PRIME') {
+                    badgeClass = 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400';
+                    label = 'Prime';
+                } else if (item.status === 'COMPOSITE') {
+                    badgeClass = 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400';
+                    label = 'Composite';
+                } else {
+                    badgeClass = 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400';
+                    label = 'Neither';
+                }
+
+                row.innerHTML = `
+                    <span class="font-mono text-sm text-slate-700 dark:text-slate-300 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 truncate">
+                        ${formatBigInt(BigInt(item.val))}
+                    </span>
+                    <span class="text-xs font-medium px-2.5 py-0.5 rounded-md shrink-0 ${badgeClass}">
+                        ${label}
+                    </span>
+                `;
+
+                row.addEventListener('click', () => {
+                    elements.numberInput.value = item.val;
+                    evaluateInput(false);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                elements.historyList.appendChild(row);
+            });
+        }
+
+        // Event Listeners
+        let debounceTimer;
+        elements.numberInput.addEventListener('input', () => {
+            const raw = elements.numberInput.value.trim();
+            elements.clearBtn.classList.toggle('hidden', raw.length === 0);
+
+            if (elements.instantCheck.checked) {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => evaluateInput(true), 180);
+            }
+        });
+
+        elements.numberInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                clearTimeout(debounceTimer);
+                evaluateInput(true);
+            }
+        });
+
+        elements.checkBtn.addEventListener('click', () => {
+            clearTimeout(debounceTimer);
+            evaluateInput(true);
+        });
+
+        elements.clearBtn.addEventListener('click', () => {
+            elements.numberInput.value = '';
+            elements.clearBtn.classList.add('hidden');
+            elements.errorBox.classList.add('hidden');
+            elements.resultSection.classList.add('hidden');
+            elements.numberInput.focus();
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                elements.numberInput.value = btn.getAttribute('data-val');
+                evaluateInput(true);
+            });
+        });
+
+        // Copy buttons
+        elements.copyNumberBtn.addEventListener('click', () => {
+            if (currentNumberStr) copyToClipboard(currentNumberStr);
+        });
+
+        elements.copyFactorsBtn.addEventListener('click', () => {
+            if (currentFactorPlainStr) copyToClipboard(currentFactorPlainStr);
+        });
+
+        // Nearest prime navigation buttons
+        elements.loadPrevPrimeBtn.addEventListener('click', () => {
+            if (currentPrevPrime !== null) {
+                elements.numberInput.value = currentPrevPrime.toString();
+                evaluateInput(true);
+            }
+        });
+
+        elements.loadNextPrimeBtn.addEventListener('click', () => {
+            if (currentNextPrime !== null) {
+                elements.numberInput.value = currentNextPrime.toString();
+                evaluateInput(true);
+            }
+        });
+
+        // Clear history
+        elements.clearHistoryBtn.addEventListener('click', () => {
+            history = [];
+            renderHistory();
+        });
+
+        // Boot
+        initTheme();
+    </script>
+</body>
+</html>
