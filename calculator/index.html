@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scientific Calculator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/12.4.2/math.min.js"></script>
+<style>
+:root{--bg:#0b0f19;--surface:#131a2a;--border:#232f4b;--text:#f1f5f9;--muted:#94a3b8;--accent:#38bdf8}
+@media(prefers-color-scheme:light){:root{--bg:#f8fafc;--surface:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#475569;--accent:#0284c7}}
+*{box-sizing:border-box;margin:0}
+body{font-family:-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:1rem}
+a{color:var(--accent);text-decoration:none;font-size:.9rem}
+h1{font-size:1.5rem;margin:.4rem 0 .2rem}
+.sub{color:var(--muted);font-size:.9rem;margin-bottom:1rem}
+.box{display:flex;gap:.5rem}
+input{flex:1;min-width:0;padding:.8rem 1rem;font:1rem ui-monospace,Consolas,monospace;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px}
+input:focus{outline:2px solid var(--accent)}
+button{padding:.6rem .9rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:.9rem;cursor:pointer}
+button:hover{border-color:var(--accent)}
+.go{background:var(--accent);color:#0b0f19;border-color:var(--accent);font-weight:700}
+.keys{display:flex;flex-wrap:wrap;gap:.4rem;margin:.8rem 0}
+.keys button{padding:.45rem .7rem;font-family:ui-monospace,monospace}
+.row{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.7rem 1rem;margin-bottom:.6rem;word-break:break-word}
+.q{color:var(--muted);font:.9rem ui-monospace,monospace}
+.a{font:1.15rem ui-monospace,monospace;color:var(--accent)}
+.err{color:#f87171}
+details{margin:1rem 0;color:var(--muted);font-size:.9rem}
+summary{cursor:pointer;margin-bottom:.5rem}
+details .keys button{font-size:.8rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+<a href="../index.html">← Portfolio</a>
+<h1>Scientific Calculator</h1>
+<p class="sub">Type an expression, press Enter. Variables, functions, units, matrices, calculus.</p>
+<div class="box">
+  <input id="in" placeholder="e.g. sin(pi/6) + 2^10" autocomplete="off" autocapitalize="none" spellcheck="false" enterkeyhint="go">
+  <button class="go" id="go">=</button>
+</div>
+<div class="keys" id="keys"></div>
+<details><summary>Try an example</summary><div class="keys" id="ex"></div></details>
+<div id="out"></div>
+</div>
+<script>
+const $=id=>document.getElementById(id), inp=$('in'), out=$('out');
+const scope={}; let deg=false; const hist=[]; let hp=0;
+
+// Degree-aware trig (numbers only)
+['sin','cos','tan'].forEach(n=>{const f=math[n];scope[n]=x=>typeof x==='number'&&deg?f(x*Math.PI/180):f(x)});
+['asin','acos','atan'].forEach(n=>{const f=math[n];scope[n]=x=>{const r=f(x);return typeof r==='number'&&deg?r*180/Math.PI:r}});
+
+// integrate("x^2", 0, 3)  — Simpson's rule
+scope.integrate=(f,a,b)=>{
+  const g=math.compile(f),sc={...scope},n=2000,h=(b-a)/n;let s=0;
+  for(let i=0;i<=n;i++){sc.x=a+i*h;s+=g.evaluate(sc)*(i===0||i===n?1:i%2?4:2)}
+  return s*h/3;
+};
+// solve("x^2-4", -10, 10) — roots by sign change + bisection
+scope.solve=(f,a=-10,b=10)=>{
+  const g=math.compile(f),sc={...scope},v=x=>(sc.x=x,g.evaluate(sc)),N=2000,h=(b-a)/N,roots=[];
+  let x0=a,y0=v(a);
+  for(let i=1;i<=N;i++){
+    const x1=a+i*h,y1=v(x1);
+    if(y0===0)roots.push(x0);
+    else if(y0*y1<0){let lo=x0,hi=x1;for(let k=0;k<60;k++){const m=(lo+hi)/2;v(lo)*v(m)<=0?hi=m:lo=m}roots.push((lo+hi)/2)}
+    x0=x1;y0=y1;
+  }
+  return math.matrix(roots.map(r=>+r.toPrecision(12)));
+};
+
+function run(src){
+  src=src.trim(); if(!src)return;
+  hist.push(src); hp=hist.length;
+  const row=document.createElement('div'),q=document.createElement('div'),a=document.createElement('div');
+  row.className='row';q.className='q';a.className='a';q.textContent=src;
+  try{
+    let r=math.evaluate(src,scope);
+    if(r&&r.isResultSet)r=r.entries[r.entries.length-1];
+    if(r===undefined)throw Error('No result');
+    a.textContent=r&&r.isNode?r.toString():typeof r==='function'?'function defined':math.format(r,{precision:14});
+    if(typeof r!=='function')scope.ans=r;
+  }catch(e){a.textContent=e.message;a.classList.add('err')}
+  row.append(q,a);out.prepend(row);
+}
+function ins(t){inp.setRangeText(t,inp.selectionStart,inp.selectionEnd,'end');inp.focus()}
+function btn(parent,label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;parent.append(b)}
+
+const degBtn=document.createElement('button');
+degBtn.onclick=()=>{deg=!deg;degBtn.textContent=deg?'DEG':'RAD'};degBtn.textContent='RAD';$('keys').append(degBtn);
+['sin(','cos(','tan(','asin(','acos(','atan(','ln(','log10(','sqrt(','abs(','^','pi','e','!','ans','i'].forEach(k=>btn($('keys'),k,()=>ins(k)));
+btn($('keys'),'AC',()=>{out.innerHTML='';inp.value=''});
+
+['2^100','sqrt(-4)','sin(pi/6)','12!','5 km to miles','(1+2i)*(3-i)','det([1,2;3,4])','f(x)=x^2+1','f(3)',
+ 'derivative("x^3*sin(x)","x")','simplify("2x+3x")','integrate("x^2",0,3)','solve("x^2-4",-10,10)']
+ .forEach(x=>btn($('ex'),x,()=>{inp.value=x;run(x);inp.value=''}));
+
+$('go').onclick=()=>{run(inp.value);inp.value='';inp.focus()};
+inp.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){run(inp.value);inp.value=''}
+  else if(e.key==='ArrowUp'&&hp>0){inp.value=hist[--hp];e.preventDefault()}
+  else if(e.key==='ArrowDown'&&hp<hist.length-1){inp.value=hist[++hp];e.preventDefault()}
+});
+</script>
+</body>
+</html>
