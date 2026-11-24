@@ -17,6 +17,12 @@ a{color:var(--accent);text-decoration:none;font-size:.9rem}
 .nav{display:flex;justify-content:space-between;font-size:.9rem}
 h1{font-size:1.4rem}
 .fn{display:flex;align-items:center;gap:.4rem;font:1rem ui-monospace,monospace}
+.dot{width:12px;height:12px;border-radius:50%;flex:none}
+.d{font:.75rem ui-monospace,monospace;color:var(--muted);margin:.1rem 0 .5rem 1.4rem;word-break:break-all}
+.dom{display:grid;grid-template-columns:auto 1fr auto 1fr;gap:.4rem;align-items:center;font:.85rem ui-monospace,monospace;color:var(--muted)}
+.dom input{width:100%;min-width:0;padding:.4rem .5rem;font:.95rem ui-monospace,monospace;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px}
+.dom input.bad{border-color:#f87171}
+.go{background:var(--accent);color:#0b0f19;border-color:var(--accent);font-weight:600}
 input[type=text]{flex:1;min-width:0;padding:.55rem .7rem;font:1rem ui-monospace,Consolas,monospace;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:8px}
 input.bad{border-color:#f87171}
 button{padding:.45rem .7rem;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer}
@@ -37,49 +43,84 @@ input[type=range]{width:100%;accent-color:var(--accent)}
   <div class="side">
     <div class="nav"><a href="../index.html">← Portfolio</a><span><a href="../plot-lab/index.html">2D</a> · <b>3D</b></span></div>
     <h1>3D Surface Lab</h1>
-    <div class="fn">z = <input type="text" id="f" value="sin(x)*cos(y)*2" inputmode="none" spellcheck="false" autocapitalize="none" autocomplete="off"></div>
+    <div id="rows"></div>
+    <button class="go" id="add">+ Add surface</button>
     <div class="row" id="pre"></div>
     <div id="sl"></div>
-    <label>domain ±<b id="rv">5</b><input type="range" id="rg" min="1" max="10" step="0.5" value="5"></label>
+    <div class="dom">
+      <span>x</span><input id="x0" value="-5"><span>to</span><input id="x1" value="5">
+      <span>y</span><input id="y0" value="-5"><span>to</span><input id="y1" value="5">
+      <span>z</span><input id="z0" placeholder="auto"><span>to</span><input id="z1" placeholder="auto">
+    </div>
     <div class="row" id="views"></div>
     <div><label class="ck"><input type="checkbox" id="pp" checked>Perspective</label><label class="ck"><input type="checkbox" id="wf" checked>Wireframe</label><label class="ck"><input type="checkbox" id="sp">Spin</label></div>
-    <div class="m" id="rng"></div><div class="m" id="dx"></div><div class="m" id="dy"></div>
-    <p class="m">Drag to rotate · pinch or scroll to zoom. Other letters become sliders.</p>
+    <div class="m" id="rng"></div>
+    <p class="m">Domain and z-range accept numbers or expressions like <code>2*pi</code>. Leave z blank for auto; if you set it, parts of a surface outside the range are cut off. Drag to rotate, pinch or scroll to zoom.</p>
   </div>
   <canvas id="cv"></canvas>
 </div>
 <script src="../shared/mathpad.js"></script>
 <script>
-const $=id=>document.getElementById(id),cv=$('cv'),ctx=cv.getContext('2d'),N=40;
-let code=null,err='',params={},symKey='',R=5,Z=[],lo=-1,hi=1;
+const $=id=>document.getElementById(id),cv=$('cv'),ctx=cv.getContext('2d'),N=40,HUES=[200,330,150,45,270,0];
+let S=[{src:'sin(x)*cos(y)*2'}],params={},symKey='',D3={x0:-5,x1:5,y0:-5,y1:5,z0:null,z1:null},zr=[-1,1];
 const st={yaw:-.8,pit:.6,zoom:1,persp:true,wire:true,spin:false};
 
-function build(){
-  const inp=$('f');err='';code=null;$('dx').textContent=$('dy').textContent='';
+function compile(f){
+  f.err='';f.code=null;f.syms=[];f.d='';
   try{
-    const node=math.parse(MathPad.prep(inp.value));
-    code=node.compile();
-    const syms=MathPad.syms(node,['x','y']),k=syms.join();
-    if(k!==symKey){symKey=k;MathPad.sliders($('sl'),syms,params,sample)}
-    for(const v of ['x','y'])try{$(v==='x'?'dx':'dy').textContent='∂z/∂'+v+' = '+MathPad.pretty(math.derivative(node,v).toString())}catch{}
-  }catch(e){err=e.message}
-  inp.classList.toggle('bad',!!err);sample();
+    const e=MathPad.prep(f.src);if(!e.trim())return;
+    const node=math.parse(e);
+    f.code=node.compile();f.syms=MathPad.syms(node,['x','y']);
+    const dd=[];
+    for(const v of ['x','y'])try{dd.push('∂z/∂'+v+' = '+MathPad.pretty(math.derivative(node,v).toString()))}catch{}
+    f.d=dd.join('   ');
+  }catch(er){f.err=er.message}
+}
+function renderRows(){
+  $('rows').innerHTML='';
+  S.forEach((f,i)=>{
+    const w=document.createElement('div');
+    w.innerHTML='<div class="fn"><span class="dot"></span>z = <input type="text" placeholder="e.g. x*y" spellcheck="false" autocapitalize="none" autocomplete="off"><button title="Remove">×</button></div><div class="d"></div>';
+    const [row,d]=w.children,inp=row.children[1];
+    row.children[0].style.background='hsl('+HUES[i%HUES.length]+',70%,55%)';
+    MathPad.field(inp);inp.value=f.src;
+    const show=()=>{inp.classList.toggle('bad',!!f.err);d.textContent=f.d};
+    show();
+    inp.oninput=()=>{f.src=inp.value;compile(f);show();update()};
+    row.children[2].onclick=()=>{S.splice(i,1);renderRows();update()};
+    $('rows').append(w);
+  });
+}
+function add(src){const f={src};compile(f);S.push(f);renderRows();update()}
+
+const val=id=>{const t=$(id).value.trim();if(!t)return null;try{const v=math.evaluate(MathPad.norm(t));return typeof v==='number'&&isFinite(v)?v:NaN}catch{return NaN}};
+function readDomain(){
+  const d={};let ok=true;const bad=(id,b)=>{$(id).classList.toggle('bad',b);if(b)ok=false};
+  for(const id of ['x0','x1','y0','y1','z0','z1']){d[id]=val(id);bad(id,d[id]!==d[id]||(d[id]===null&&!id.startsWith('z')))}
+  if(ok)for(const [a,b] of [['x0','x1'],['y0','y1'],['z0','z1']])if(d[a]!==null&&d[b]!==null&&!(d[a]<d[b])){bad(a,true);bad(b,true)}
+  if(ok){D3=d;sample()}
+}
+function update(){
+  const syms=[...new Set(S.flatMap(f=>f.syms))].sort(),k=syms.join();
+  if(k!==symKey){symKey=k;MathPad.sliders($('sl'),syms,params,sample)}
+  sample();
 }
 function sample(){
-  Z=[];const vals=[];
-  if(code){
-    const sc={...params};
-    for(let i=0;i<=N;i++){Z[i]=[];for(let j=0;j<=N;j++){
-      sc.x=-R+2*R*i/N;sc.y=-R+2*R*j/N;
-      let z;try{z=code.evaluate(sc)}catch{z=NaN}
+  const vals=[],sc={...params},{x0,x1,y0,y1}=D3;
+  S.forEach(f=>{
+    f.Z=[];if(!f.code)return;
+    for(let i=0;i<=N;i++){f.Z[i]=[];for(let j=0;j<=N;j++){
+      sc.x=x0+(x1-x0)*i/N;sc.y=y0+(y1-y0)*j/N;
+      let z;try{z=f.code.evaluate(sc)}catch{z=NaN}
       if(typeof z!=='number'||!isFinite(z))z=NaN;
-      Z[i][j]=z;if(z===z)vals.push(z);
+      f.Z[i][j]=z;if(z===z)vals.push(z);
     }}
-  }
+  });
   vals.sort((a,b)=>a-b);
-  lo=vals.length?vals[Math.floor(vals.length*.02)]:-1;hi=vals.length?vals[Math.ceil(vals.length*.98)-1]:1;
-  if(hi-lo<1e-9){lo-=1;hi+=1}
-  $('rng').textContent='z ∈ ['+(+lo.toPrecision(4))+', '+(+hi.toPrecision(4))+']';
+  let alo=vals.length?vals[Math.floor(vals.length*.02)]:-1,ahi=vals.length?vals[Math.ceil(vals.length*.98)-1]:1;
+  zr=[D3.z0??alo,D3.z1??ahi];
+  if(!(zr[1]-zr[0]>1e-9))zr[1]=zr[0]+1;
+  $('rng').textContent='z range: ['+(+zr[0].toPrecision(4))+', '+(+zr[1].toPrecision(4))+']'+(D3.z0===null&&D3.z1===null?' (auto)':'');
   draw();
 }
 function draw(){
@@ -88,32 +129,44 @@ function draw(){
   if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr)}
   ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,W,H);
   const cy=Math.cos(st.yaw),sy=Math.sin(st.yaw),ce=Math.cos(st.pit),se=Math.sin(st.pit);
-  const sc=Math.min(W,H)/(2.4*R)*st.zoom,D=R*6;
-  // world (X,Y right/forward, Zw up) -> screen px + depth (bigger = farther)
+  const sc=Math.min(W,H)/3*st.zoom,D=6,ZH=.8;
+  // normalized box: x,y in [-1,1], z in [-ZH,ZH]; returns screen x,y and depth (bigger = farther)
   const P=(X,Y,Zw)=>{const x1=X*cy-Y*sy,y1=X*sy+Y*cy,u=Zw*ce+y1*se,d=y1*ce-Zw*se,f=st.persp?D/(D+d):1;return[W/2+x1*f*sc,H/2-u*f*sc,d]};
-  const zw=z=>(Math.min(hi,Math.max(lo,z))-(lo+hi)/2)/(hi-lo)*R*1.2, xs=i=>-R+2*R*i/N, h=2*R/N, quads=[];
-  for(let i=0;i<N;i++)for(let j=0;j<N;j++){
-    if(!Z[i])break;
-    const a=Z[i][j],b=Z[i+1][j],c=Z[i+1][j+1],d=Z[i][j+1];
-    if([a,b,c,d].some(v=>v!==v))continue;
-    const pts=[[i,j,a],[i+1,j,b],[i+1,j+1,c],[i,j+1,d]].map(([u,v,z])=>P(xs(u),xs(v),zw(z)));
-    const gx=(zw(b)-zw(a)+zw(c)-zw(d))/(2*h),gy=(zw(d)-zw(a)+zw(c)-zw(b))/(2*h);
-    const lit=.5+.5*Math.max(0,(.9-.3*gx-.3*gy)/Math.hypot(gx,gy,1));
-    const t=(Math.min(hi,Math.max(lo,(a+b+c+d)/4))-lo)/(hi-lo);
-    quads.push({pts,t,lit,dp:(pts[0][2]+pts[1][2]+pts[2][2]+pts[3][2])/4});
-  }
+  const zn=z=>(Math.min(zr[1],Math.max(zr[0],z))-(zr[0]+zr[1])/2)/(zr[1]-zr[0])*2*ZH;
+  const out=z=>(D3.z0!==null&&z<D3.z0)||(D3.z1!==null&&z>D3.z1);
+  const cs=[];for(let a=0;a<8;a++)cs.push(P(a&1?1:-1,a&2?1:-1,a&4?ZH:-ZH));
+  ctx.strokeStyle='rgba(148,163,184,.35)';ctx.lineWidth=1;ctx.beginPath();
+  for(let a=0;a<8;a++)for(const b of [1,2,4])if(!(a&b)){ctx.moveTo(cs[a][0],cs[a][1]);ctx.lineTo(cs[a|b][0],cs[a|b][1])}
+  ctx.stroke();
+  const h=2/N,quads=[];
+  S.forEach((f,k)=>{
+    if(!f.Z||!f.Z.length)return;
+    for(let i=0;i<N;i++)for(let j=0;j<N;j++){
+      const a=f.Z[i][j],b=f.Z[i+1][j],c=f.Z[i+1][j+1],d=f.Z[i][j+1];
+      if([a,b,c,d].some(v=>v!==v||out(v)))continue;
+      const u=-1+2*i/N,v=-1+2*j/N;
+      const pts=[[u,v,a],[u+h,v,b],[u+h,v+h,c],[u,v+h,d]].map(([X,Y,z])=>P(X,Y,zn(z)));
+      const gx=(zn(b)-zn(a)+zn(c)-zn(d))/(2*h),gy=(zn(d)-zn(a)+zn(c)-zn(b))/(2*h);
+      const lit=.5+.5*Math.max(0,(.9-.3*gx-.3*gy)/Math.hypot(gx,gy,1));
+      const t=(Math.min(zr[1],Math.max(zr[0],(a+b+c+d)/4))-zr[0])/(zr[1]-zr[0]);
+      quads.push({pts,hue:HUES[k%HUES.length],l:24+34*lit+10*t,dp:(pts[0][2]+pts[1][2]+pts[2][2]+pts[3][2])/4});
+    }
+  });
   quads.sort((p,q)=>q.dp-p.dp);
   ctx.lineJoin='round';
   for(const q of quads){
     ctx.beginPath();q.pts.forEach((p,k)=>k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]));ctx.closePath();
-    const col='hsl('+(240-220*q.t)+',75%,'+(28+36*q.lit)+'%)';
+    const col='hsl('+q.hue+',70%,'+q.l+'%)';
     ctx.fillStyle=col;ctx.fill();
     ctx.strokeStyle=st.wire?'rgba(0,0,0,.35)':col;ctx.lineWidth=st.wire?.6:.8;ctx.stroke();
   }
-  ctx.font='bold 13px ui-monospace,monospace';ctx.lineWidth=1.6;
-  [['x',[R,0,0],[-R,0,0],'#f87171'],['y',[0,R,0],[0,-R,0],'#4ade80'],['z',[0,0,.7*R],[0,0,-.7*R],'#60a5fa']].forEach(([n,e,s,c])=>{
-    const a=P(...s),b=P(...e);ctx.strokeStyle=ctx.fillStyle=c;
-    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();ctx.fillText(n,b[0]+5,b[1]-5);
+  // axes along the box corner, labelled with real ranges
+  const fm=v=>String(+v.toPrecision(4)),o=[-1,-1,-ZH];
+  ctx.font='bold 12px ui-monospace,monospace';ctx.lineWidth=1.8;
+  [['x',[1,-1,-ZH],'#f87171',D3.x0,D3.x1],['y',[-1,1,-ZH],'#4ade80',D3.y0,D3.y1],['z',[-1,-1,ZH],'#60a5fa',zr[0],zr[1]]].forEach(([n,e,c,lo,hi])=>{
+    const a=P(...o),b=P(...e);ctx.strokeStyle=ctx.fillStyle=c;
+    ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();
+    ctx.fillText(n+' '+fm(hi),b[0]+5,b[1]-5);ctx.fillText(fm(lo),a[0]+5,a[1]+14);
   });
 }
 
@@ -131,17 +184,17 @@ cv.addEventListener('pointermove',e=>{
 cv.addEventListener('wheel',e=>{e.preventDefault();st.zoom=Math.min(8,Math.max(.2,st.zoom*Math.exp(-e.deltaY*.0015)));draw()},{passive:false});
 
 [['Paraboloid','(x^2+y^2)/4'],['Saddle','(x^2-y^2)/4'],['Ripple','sin(sqrt(x^2+y^2))*3'],['Waves','sin(x)*cos(y)*2'],['Gaussian','4*exp(-(x^2+y^2)/4)'],['Sliders','a*sin(x)+b*cos(y)']]
-  .forEach(([n,e])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{$('f').value=e;build()};$('pre').append(b)});
+  .forEach(([n,e])=>{const b=document.createElement('button');b.textContent='+ '+n;b.onclick=()=>add(e);$('pre').append(b)});
 [['Top',0,Math.PI/2],['Front',0,0],['Side',Math.PI/2,0],['Iso',-.8,.6]]
   .forEach(([n,y,p])=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>{Object.assign(st,{yaw:y,pit:p,zoom:1});draw()};$('views').append(b)});
 let raf;
 $('sp').onchange=e=>{st.spin=e.target.checked;const tick=()=>{if(!st.spin)return;st.yaw+=.01;draw();raf=requestAnimationFrame(tick)};cancelAnimationFrame(raf);tick()};
 $('pp').onchange=e=>{st.persp=e.target.checked;draw()};
 $('wf').onchange=e=>{st.wire=e.target.checked;draw()};
-$('rg').oninput=e=>{R=+e.target.value;$('rv').textContent=R;sample()};
-$('f').oninput=build;MathPad.field($('f'));
+$('add').onclick=()=>{S.push({src:''});renderRows();$('rows').lastChild.querySelector('input').focus()};
+['x0','x1','y0','y1','z0','z1'].forEach(id=>$(id).oninput=readDomain);
 new ResizeObserver(draw).observe(cv);
-build();MathPad.attach();
+S.forEach(compile);renderRows();update();MathPad.attach();
 </script>
 </body>
 </html>
